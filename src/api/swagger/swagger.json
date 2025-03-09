@@ -1,0 +1,662 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "بات هوشمند اینستاگرام API",
+    "description": "API برای مدیریت و کنترل بات هوشمند اینستاگرام با رفتار انسانی",
+    "version": "1.0.0",
+    "contact": {
+      "name": "پشتیبانی",
+      "email": "support@example.com"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "سرور توسعه محلی"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Bot Actions",
+      "description": "عملیات‌های مربوط به کنترل بات"
+    },
+    {
+      "name": "Statistics",
+      "description": "آمار و اطلاعات فعالیت‌های بات"
+    },
+    {
+      "name": "Settings",
+      "description": "تنظیمات بات"
+    }
+  ],
+  "paths": {
+    "/api/actions/start": {
+      "post": {
+        "tags": ["Bot Actions"],
+        "summary": "Start the bot",
+        "description": "Start the Instagram bot's automated activities",
+        "responses": {
+          "200": {
+            "description": "Bot started successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Bot started successfully"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bot could not be started",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Bot is already running"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Error starting bot"
+                    },
+                    "error": {
+                      "type": "string",
+                      "example": "Internal server error"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/actions/stop": {
+      "post": {
+        "tags": ["Bot Actions"],
+        "summary": "Stop the bot",
+        "description": "Stop the Instagram bot's automated activities",
+        "responses": {
+          "200": {
+            "description": "Bot stopped successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Bot stopped successfully"
+                    },
+                    "lastTask": {
+                      "type": "string",
+                      "example": "interacting_with_users"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bot could not be stopped",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Bot is not running"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/actions/status": {
+      "get": {
+        "tags": ["Bot Actions"],
+        "summary": "Get bot status",
+        "description": "Retrieve the current status of the bot",
+        "responses": {
+          "200": {
+            "description": "Bot status retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "status": {
+                      "type": "object",
+                      "properties": {
+                        "isRunning": {
+                          "type": "boolean",
+                          "example": true
+                        },
+                        "currentTask": {
+                          "type": "string",
+                          "example": "interacting_with_users"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/actions/run-task": {
+      "post": {
+        "tags": ["Bot Actions"],
+        "summary": "Run a specific task",
+        "description": "Execute a specific task manually",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["taskName"],
+                "properties": {
+                  "taskName": {
+                    "type": "string",
+                    "description": "Name of the task to run",
+                    "enum": [
+                      "update_trends",
+                      "follow_users",
+                      "unfollow_users",
+                      "interact_with_user",
+                      "follow_back"
+                    ],
+                    "example": "update_trends"
+                  },
+                  "options": {
+                    "type": "object",
+                    "description": "Options for the task",
+                    "example": {
+                      "count": 10,
+                      "username": "example_user"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Task executed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Task update_trends completed successfully"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Task name is required"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/stats/account": {
+      "get": {
+        "tags": ["Statistics"],
+        "summary": "Get account statistics",
+        "description": "Retrieve general statistics about the Instagram account",
+        "responses": {
+          "200": {
+            "description": "Account statistics retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "stats": {
+                      "type": "object",
+                      "properties": {
+                        "daily": {
+                          "type": "object",
+                          "properties": {
+                            "likes": {
+                              "type": "integer",
+                              "example": 45
+                            },
+                            "comments": {
+                              "type": "integer",
+                              "example": 12
+                            },
+                            "follows": {
+                              "type": "integer",
+                              "example": 8
+                            },
+                            "unfollows": {
+                              "type": "integer",
+                              "example": 5
+                            },
+                            "directMessages": {
+                              "type": "integer",
+                              "example": 10
+                            },
+                            "storyViews": {
+                              "type": "integer",
+                              "example": 30
+                            },
+                            "total": {
+                              "type": "integer",
+                              "example": 110
+                            }
+                          }
+                        },
+                        "weekly": {
+                          "type": "object",
+                          "properties": {
+                            "interactions": {
+                              "type": "integer",
+                              "example": 550
+                            }
+                          }
+                        },
+                        "monthly": {
+                          "type": "object",
+                          "properties": {
+                            "interactions": {
+                              "type": "integer",
+                              "example": 2200
+                            }
+                          }
+                        },
+                        "follows": {
+                          "type": "object",
+                          "properties": {
+                            "active": {
+                              "type": "integer",
+                              "example": 150
+                            },
+                            "followBacks": {
+                              "type": "integer",
+                              "example": 84
+                            },
+                            "followBackRate": {
+                              "type": "number",
+                              "example": 56.0
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Active account not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "No active account found"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/settings": {
+      "get": {
+        "tags": ["Settings"],
+        "summary": "Get settings",
+        "description": "Retrieve current bot settings",
+        "responses": {
+          "200": {
+            "description": "Settings retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "settings": {
+                      "type": "object",
+                      "properties": {
+                        "botMode": {
+                          "type": "string",
+                          "example": "active"
+                        },
+                        "enabledFeatures": {
+                          "type": "object",
+                          "properties": {
+                            "like": {
+                              "type": "boolean",
+                              "example": true
+                            },
+                            "comment": {
+                              "type": "boolean",
+                              "example": true
+                            },
+                            "follow": {
+                              "type": "boolean",
+                              "example": false
+                            },
+                            "unfollow": {
+                              "type": "boolean",
+                              "example": false
+                            },
+                            "directMessage": {
+                              "type": "boolean",
+                              "example": true
+                            },
+                            "viewStory": {
+                              "type": "boolean",
+                              "example": true
+                            }
+                          }
+                        },
+                        "limits": {
+                          "type": "object",
+                          "properties": {
+                            "dailyLikes": {
+                              "type": "integer",
+                              "example": 80
+                            },
+                            "dailyComments": {
+                              "type": "integer",
+                              "example": 30
+                            },
+                            "dailyFollows": {
+                              "type": "integer",
+                              "example": 30
+                            },
+                            "dailyUnfollows": {
+                              "type": "integer",
+                              "example": 30
+                            },
+                            "dailyDirectMessages": {
+                              "type": "integer",
+                              "example": 15
+                            },
+                            "dailyStoryViews": {
+                              "type": "integer",
+                              "example": 100
+                            }
+                          }
+                        },
+                        "schedule": {
+                          "type": "object",
+                          "properties": {
+                            "startHour": {
+                              "type": "integer",
+                              "example": 9
+                            },
+                            "endHour": {
+                              "type": "integer",
+                              "example": 23
+                            },
+                            "activeOnWeekends": {
+                              "type": "boolean",
+                              "example": true
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["Settings"],
+        "summary": "Update settings",
+        "description": "Update bot settings",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "botMode": {
+                    "type": "string",
+                    "enum": ["active", "passive", "maintenance", "stealth"]
+                  },
+                  "enabledFeatures": {
+                    "type": "object",
+                    "properties": {
+                      "like": {
+                        "type": "boolean"
+                      },
+                      "comment": {
+                        "type": "boolean"
+                      },
+                      "follow": {
+                        "type": "boolean"
+                      },
+                      "unfollow": {
+                        "type": "boolean"
+                      },
+                      "directMessage": {
+                        "type": "boolean"
+                      },
+                      "viewStory": {
+                        "type": "boolean"
+                      }
+                    }
+                  },
+                  "limits": {
+                    "type": "object",
+                    "properties": {
+                      "dailyLikes": {
+                        "type": "integer"
+                      },
+                      "dailyComments": {
+                        "type": "integer"
+                      },
+                      "dailyFollows": {
+                        "type": "integer"
+                      },
+                      "dailyUnfollows": {
+                        "type": "integer"
+                      },
+                      "dailyDirectMessages": {
+                        "type": "integer"
+                      },
+                      "dailyStoryViews": {
+                        "type": "integer"
+                      }
+                    }
+                  },
+                  "schedule": {
+                    "type": "object",
+                    "properties": {
+                      "startHour": {
+                        "type": "integer"
+                      },
+                      "endHour": {
+                        "type": "integer"
+                      },
+                      "activeOnWeekends": {
+                        "type": "boolean"
+                      }
+                    }
+                  },
+                  "targetCriteria": {
+                    "type": "object",
+                    "properties": {
+                      "minFollowers": {
+                        "type": "integer"
+                      },
+                      "maxFollowers": {
+                        "type": "integer"
+                      },
+                      "minEngagementRate": {
+                        "type": "number"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Settings updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Settings updated successfully"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "No settings provided for update"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ]
+}
