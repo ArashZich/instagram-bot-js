@@ -11,7 +11,7 @@ class Humanizer {
    * ایجاد تاخیر تصادفی بین حداقل و حداکثر زمان مشخص شده (بر حسب ثانیه)
    */
   async simulateHumanDelay(minSeconds, maxSeconds) {
-    const delay = this.getRandomInt(minSeconds * 1000, maxSeconds * 1000);
+    const delay = this.getRandomInt(minSeconds * 2000, maxSeconds * 2000);
     logger.debug(`Adding human delay of ${delay / 1000} seconds`);
     return new Promise((resolve) => setTimeout(resolve, delay));
   }

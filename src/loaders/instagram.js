@@ -13,9 +13,33 @@ let ig = null;
 const loadState = async () => {
   try {
     const account = await Account.findOne({ isActive: true });
+
+    // اگر حساب فعال در دیتابیس یافت نشد، یک حساب با مقادیر env ایجاد کنید
     if (!account) {
-      logger.error("No active Instagram account found in database");
-      throw new Error("No active Instagram account found");
+      logger.info(
+        "No active Instagram account found in database, creating one from environment variables"
+      );
+
+      // بررسی کنید که متغیرهای محیطی وجود دارند
+      if (!process.env.INSTAGRAM_USERNAME || !process.env.INSTAGRAM_PASSWORD) {
+        logger.error("No Instagram credentials found in environment variables");
+        throw new Error("No Instagram credentials available");
+      }
+
+      // ایجاد حساب جدید با متغیرهای محیطی
+      const newAccount = new Account({
+        username: process.env.INSTAGRAM_USERNAME,
+        password: process.env.INSTAGRAM_PASSWORD,
+        email: process.env.INSTAGRAM_EMAIL || "",
+        isActive: true,
+      });
+
+      await newAccount.save();
+      logger.info(
+        `Created new account from environment variables: ${newAccount.username}`
+      );
+
+      return null; // برگرداندن null برای اینکه یک لاگین تازه انجام شود
     }
 
     // Try to load saved state if exists
@@ -57,9 +81,24 @@ module.exports = async () => {
     ig = new IgApiClient();
 
     // Load account info
-    const account = await Account.findOne({ isActive: true });
+    let account = await Account.findOne({ isActive: true });
+
+    // اگر حساب فعال نبود، سعی کنید از متغیرهای محیطی استفاده کنید
     if (!account) {
-      throw new Error("No active Instagram account found");
+      if (process.env.INSTAGRAM_USERNAME && process.env.INSTAGRAM_PASSWORD) {
+        logger.info("Creating account from environment variables");
+        account = new Account({
+          username: process.env.INSTAGRAM_USERNAME,
+          password: process.env.INSTAGRAM_PASSWORD,
+          isActive: true,
+        });
+        await account.save();
+        logger.info(`Account created: ${account.username}`);
+      } else {
+        throw new Error(
+          "No active Instagram account found and no credentials in environment"
+        );
+      }
     }
 
     // Generate device
@@ -67,6 +106,7 @@ module.exports = async () => {
 
     // Try to restore session
     const savedState = await loadState();
+
     if (savedState) {
       await ig.state.deserialize(savedState);
 
@@ -99,7 +139,15 @@ async function performLogin(account) {
   try {
     // Perform login
     logger.info(`Logging in to Instagram as ${account.username}`);
+
+    // برای دیباگ، مقادیر ارسالی رو لاگ کنید
+    logger.debug(
+      `Login attempt with username: ${account.username}, password: ***`
+    );
+
     await ig.simulate.preLoginFlow();
+
+    // مستقیم از مقادیر و نه از آبجکت account استفاده کنید
     const loggedInUser = await ig.account.login(
       account.username,
       account.password
@@ -126,6 +174,12 @@ async function performLogin(account) {
       logger.error("Incorrect password. Please update your credentials.");
     } else if (error.message.includes("invalid_user")) {
       logger.error("Username not found.");
+    } else if (error.message.includes("data argument must be")) {
+      logger.error(
+        "Data format error in Instagram API. This might be due to a network issue or API change."
+      );
+    } else {
+      logger.error(`Unknown Instagram login error: ${error.stack}`);
     }
 
     throw error;

@@ -12,12 +12,21 @@ services:
       - ./:/usr/src/app
       - /usr/src/app/node_modules
     depends_on:
-      - mongo
+      mongo:
+        condition: service_started
     environment:
+      - TZ=Asia/Tehran 
       - NODE_ENV=development
       - MONGO_URI=mongodb://mongo:27017/instagram-bot
     networks:
       - app-network
+    # افزودن این قسمت
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
 
   mongo:
     image: mongo:latest

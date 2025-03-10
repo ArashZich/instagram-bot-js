@@ -78,18 +78,26 @@ const startServer = async () => {
     await mongooseLoader();
     logger.info("MongoDB connected");
 
-    // Initialize Instagram client
-    await instagramLoader();
-    logger.info("Instagram client initialized");
-
-    // Start the scheduler
-    scheduler.start();
-    logger.info("Task scheduler started");
-
-    // Start the server
-    app.listen(PORT, () => {
+    // راه‌اندازی سرور
+    const server = app.listen(PORT, () => {
       logger.info(`Server running on port ${PORT}`);
     });
+
+    if (process.env.DISABLE_INSTAGRAM === "true") {
+      logger.info("Instagram functionality disabled by environment variable");
+    } else {
+      try {
+        await instagramLoader();
+        logger.info("Instagram client initialized");
+        scheduler.start();
+        logger.info("Task scheduler started");
+      } catch (instagramError) {
+        logger.error(`Error initializing Instagram: ${instagramError.message}`);
+        logger.info("Server is running without Instagram functionality");
+      }
+    }
+
+    return server;
   } catch (error) {
     logger.error(`Error starting server: ${error.message}`);
     process.exit(1);
